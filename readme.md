@@ -82,6 +82,8 @@ Simply by mixing in the property traits, we can build a cache which does not hav
 
 The new `RedisCache` will now populate all keys on insert, not simply the one that an object was accessed with.
 
+There is also a functor-ized version for which `getFromCache` returns a result wrapped inside an `ApplicativePlus[_]` instance. This is useful for, e.g., [spray](http://spray.io) style caching, which returns a `Future[V]` rather than a `V`.
+
 ## com.bayesianwitch.injera.deduplication
 
 The class `Deduplicator[T]` is provided. This class is mathematically the identity function:
