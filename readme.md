@@ -13,6 +13,8 @@ Add this to your build.scala file:
 
 ## com.bayesianwitch.injera.functions
 
+### FunctionWithPreimage
+
 The trait `FunctionWithPreimage[K,V]` represents a function for which the preimage can be computed:
 
     trait FunctionWithPreimage[K,V] extends (K => V) {
@@ -49,6 +51,36 @@ Provided `getPersonByPhoneNumber` and `getBusinessByPhoneNumber` are implemented
     implicit object HasFunctionWithPreimage[PhoneNumber,HasPhoneNumbers] {
       def preimageOf(v: V) = v.phoneNumbers
     }
+
+#### Caching
+
+An important use case for the `FunctionWithPreimage` trait is pre-warming a cache. Suppose you wish to implement a cache. You might write it as follows:
+
+    class RedisCache(...) = {
+      def put(k: K, v: V) = shoveIntoRedis(serialize(k), serialize(v)v)
+      def get(k: K): V = pullOutOfRedis(serialize(k))
+      def invalidate(k: K) = deleteFromRedis(serialize(k))
+    }
+
+However, the problem is that the following will result in two cache misses:
+
+    businessByPhoneNumberCache.get(PhoneNumber(111-111-1111))
+    //returns Business(PhoneNumber(111-111-1111), PhoneNumber(222-222-2222))
+
+    businessByPhoneNumberCache.get(PhoneNumber(222-222-2222))
+    //cache miss!
+
+Simply by mixing in the property traits, we can build a cache which does not have this issue. Here is how:
+
+    class RedisCache extends CacheFunctionWithPreimage[PhoneNumber,Business] {
+      protected implicit val fwpi = getBusinessByPhoneNumber
+
+      protected def putImpl(k: PhoneNumber, v: Business) = ...put into redis...
+      protected def invalidateImpl(k: PhoneNumber) = ...delete from redis...
+      protected def getFromCache(k: PhoneNumber) = ...pull from redis...
+    }
+
+The new `RedisCache` will now populate all keys on insert, not simply the one that an object was accessed with.
 
 ## com.bayesianwitch.injera.deduplication
 
