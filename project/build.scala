@@ -5,10 +5,10 @@ import Keys._
 object ApplicationBuild extends Build {
 
   lazy val commonSettings = Defaults.defaultSettings ++ Seq(
-    organization := "com.chrisstucchio",
+    organization := "com.bayesianwitch",
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     scalaVersion := "2.10.0",
-    version := "0.16rc6",
+    version := "0.01.1",
     resolvers ++= myResolvers,
     name := "injera",
     //fork := true,

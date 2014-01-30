@@ -44,14 +44,14 @@ trait FunctorReadableStore[-K,V, M[_]] {
 }
 
 trait FunctorCacheFunctionWithPreimage[K,V,M[_]] extends FunctorReadableStore[K,V,M] with WritesEntirePreimage[K,V] {
-  protected implicit val mPlus: Plus[M]
+  protected implicit val mFunctor: ApplicativePlus[M]
 
   protected implicit val cpi = fwpi
   protected implicit val fwpi: FunctionMWithPreimage[K,V,M]
 
   protected def getFromCache(k: K): M[V]
 
-  def get(k: K): M[V] = mPlus.plus(getFromCache(k), {
+  def get(k: K): M[V] = mFunctor.plus(getFromCache(k), {
     val result = fwpi(k)
     result.map( v => putObj(v))
     result
