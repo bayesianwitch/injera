@@ -4,6 +4,15 @@ trait RepeatAvoider[T <: Object] {
   /* This is like a deduplicator, but is meant to be used with functions having side effects.
 
    For example, inserting a value in an idempotent manner into a database.
+
+   To implement, the check and set functions must be defined. Semantics:
+
+   val k = ...
+   check(k) === true
+   set(k)
+   check(k) === false
+
+   In most practical applications this relationship will be only approximate.
    */
   protected def check(k: T): Boolean
   protected def set(k: T): Unit
