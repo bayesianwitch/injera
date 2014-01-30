@@ -11,6 +11,17 @@ Add this to your build.scala file:
 
 # Utilities
 
+## com.bayesianwitch.injera.counting
+
+Assorted traits representing mutable counters and various extensions. The simplest counter:
+
+    trait Counter[T] {
+      def inc(t: T): Long
+      def get(t: T): Long
+    }
+
+Various extensions exist including `IterableCounter` (which provides an iterator of non-zero keys), `AddableCounter` (which allows you to increment a value by more than 1), and a `ZeroableCounter` which allows you to zero out a counter and return the full list of non-zero keys.
+
 ## com.bayesianwitch.injera.functions
 
 ### FunctionWithPreimage
@@ -84,7 +95,7 @@ The new `RedisCache` will now populate all keys on insert, not simply the one th
 
 There is also a functor-ized version for which `getFromCache` returns a result wrapped inside an `ApplicativePlus[_]` instance. This is useful for, e.g., [spray](http://spray.io) style caching, which returns a `Future[V]` rather than a `V`.
 
-## com.bayesianwitch.injera.deduplication
+# com.bayesianwitch.injera.deduplication
 
 The class `Deduplicator[T]` is provided. This class is mathematically the identity function:
 
@@ -92,3 +103,13 @@ The class `Deduplicator[T]` is provided. This class is mathematically the identi
     x == deduplicator(x)
 
 The purpose of the deduplicator is solely to reduce memory usage - if `x == y` then `deduplicator(x)` and `deduplicator(y)` will share the same memory location. The [rationale can be found here](http://www.chrisstucchio.com/blog/2013/deduplication.html). It takes `maximumSize` and `ttlInSeconds` arguments.
+
+There is also the `RepeatAvoider[T]` trait with several implementations. It's purpose is to avoid running a stateful function more than once - think deduplication but for side effects:
+
+    val ra: RepeatAvoider[String] = new BloomFilterRepeatAvoider[String]()(stringFunnel)
+
+    val keys = List("foo", "bar", "foo", "bar")
+    keys.foreach(k => ra(k)(insertIntoDatabaseIfNotAlreadyPresent(k)) )
+
+    //Only hits the database twice, in spite of the fact that "foo" and "bar"
+    //are both found in the keys list twice.
