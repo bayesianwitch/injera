@@ -1,22 +1,19 @@
 package com.bayesianwitch.injera.deduplication
 
-import com.google.common.cache._
-import java.util.concurrent.TimeUnit
-
-class RepeatAvoider[T <: Object](maximumSize: Long = 1024, expireTime: Int = 10) {
+trait RepeatAvoider[T <: Object] {
   /* This is like a deduplicator, but is meant to be used with functions having side effects.
 
    For example, inserting a value in an idempotent manner into a database.
    */
-  private val cache: Cache[T,T] = CacheBuilder.newBuilder().maximumSize(maximumSize).expireAfterWrite(expireTime, TimeUnit.MINUTES).build();
+  protected def check(k: T): Boolean
+  protected def set(k: T): Unit
 
-  def apply(k: T)(f: T => Unit) = {
-    if (cache.getIfPresent(k) == null) {
+  def apply(k: T)(f: T => Unit): Unit = {
+    if (check(k)) {
       f(k)
-      cache.put(k,k)
+      set(k)
     }
   }
-
   def avoidRepeatsLater(k: T)(f: T => Unit): () => Unit = {
     /* This us used when you don't necessarily want to prevent repeats immediately. For example:
 
@@ -26,9 +23,9 @@ class RepeatAvoider[T <: Object](maximumSize: Long = 1024, expireTime: Int = 10)
      databaseConnection.commit()
      noRepeat()
      */
-    if (cache.getIfPresent(k) == null) {
+    if (check(k)) {
       f(k)
-      () => cache.put(k,k)
+      () => set(k)
     } else {
       () => ()
     }
