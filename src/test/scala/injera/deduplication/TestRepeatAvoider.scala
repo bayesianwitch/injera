@@ -9,26 +9,26 @@ abstract class TestRepeatAvoider(name: String) extends Properties(name) {
   property("avoid repeats") = forAll((x: String) => {
     val r = newRepeatAvoider
     var count: Int = 0
-    r(x)(s => { count += 1 })
-    r(x)(s => { count += 1 })
+    r(x)({ count += 1 })
+    r(x)({ count += 1 })
     count == 1
   })
 
   property("but don't avoid non-repeats") = forAll((x: String, y: String) => {
     val r = newRepeatAvoider
     var count: Int = 0
-    r(x)(s => { count += 1 })
-    r(y)(s => { count += 1 })
+    r(x)({ count += 1 })
+    r(y)({ count += 1 })
     count == Set(x,y).size
   })
 
   property("delayed repeat avoidance") = forAll((x: String) => {
     val r = newRepeatAvoider
     var count: Int = 0
-    val f = r.avoidRepeatsLater(x)(s => { count += 1 })
-    r.avoidRepeatsLater(x)(s => { count += 1 })
+    val f = r.avoidRepeatsLater(x)({ count += 1 })
+    r.avoidRepeatsLater(x)({ count += 1 })
     f()
-    r.avoidRepeatsLater(x)(s => { count += 1 })
+    r.avoidRepeatsLater(x)({ count += 1 })
     count == 2
   })
 }

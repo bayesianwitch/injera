@@ -8,7 +8,7 @@ object ApplicationBuild extends Build {
     organization := "com.bayesianwitch",
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
     scalaVersion := "2.10.0",
-    version := "0.01.2",
+    version := "0.01.3",
     resolvers ++= myResolvers,
     name := "injera",
     //fork := true,

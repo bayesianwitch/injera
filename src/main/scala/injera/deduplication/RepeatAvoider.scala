@@ -17,13 +17,13 @@ trait RepeatAvoider[T <: Object] {
   protected def check(k: T): Boolean
   protected def set(k: T): Unit
 
-  def apply(k: T)(f: T => Unit): Unit = {
+  def apply(k: T)(f: => Unit): Unit = {
     if (check(k)) {
-      f(k)
+      f
       set(k)
     }
   }
-  def avoidRepeatsLater(k: T)(f: T => Unit): () => Unit = {
+  def avoidRepeatsLater(k: T)(f: => Unit): () => Unit = {
     /* This us used when you don't necessarily want to prevent repeats immediately. For example:
 
      val rp = new RepeatAvoider()
@@ -33,7 +33,7 @@ trait RepeatAvoider[T <: Object] {
      noRepeat()
      */
     if (check(k)) {
-      f(k)
+      f
       () => set(k)
     } else {
       () => ()
