@@ -7,16 +7,17 @@ object ApplicationBuild extends Build {
   lazy val commonSettings = Defaults.defaultSettings ++ Seq(
     organization := "com.bayesianwitch",
     credentials += Credentials(Path.userHome / ".ivy2" / ".credentials"),
-    scalaVersion := "2.10.0",
+    scalaVersion := "2.11.0",
+    crossScalaVersions  := Seq("2.11.0", "2.10.3"),
     version := "0.01.6",
     resolvers ++= myResolvers,
     name := "injera",
     //fork := true,
     libraryDependencies ++= Seq(
-      "org.scalaz" %% "scalaz-core" % "7.0.1",
+      "org.scalaz" %% "scalaz-core" % "7.0.6",
       "com.google.code.findbugs" % "jsr305" % "2.0.2", //necessary for guava to work
       "com.google.guava" % "guava" % "15.0",
-      "org.scalacheck" %% "scalacheck" % "1.10.0" % "test"
+      "org.scalacheck" %% "scalacheck" % "1.11.3" % "test"
     ),
     publishTo := Some(Resolver.file("file",  new File( "/tmp/injera-publish" )) )
   )
